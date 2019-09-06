@@ -1,0 +1,22 @@
+패킷 파싱 형식
+
+{a1003240}{b102300}{b22}{c1412}{d232933}
+
+a = FrontSonar
+b = RightHeghtSonar
+c = LeftHeghtSonar
+d = RightSideSonar
+e = LeftSideSonar
+
+f = RightMotor
+g = LeftMotor
+h = RightMotorDIR
+i = LeftMotorDIR
+
+j = RightFrontLED
+k = LeftFrontLED
+l = RightBackLED
+m = LeftBackLED
+
+0   1    2
+1   10  100
