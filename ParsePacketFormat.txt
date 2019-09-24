@@ -18,5 +18,8 @@ k = LeftFrontLED
 l = RightBackLED
 m = LeftBackLED
 
+sop = [
+eop = ]
+
 0   1    2
 1   10  100

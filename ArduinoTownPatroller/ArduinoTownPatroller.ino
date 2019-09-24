@@ -4,6 +4,7 @@
 #include "MotorManager.h"
 #include "StatusDeserializer.h"
 #include "StatusSerializer.h"
+#include "LEDManager.h"
 
 #define SystemToggle 9
 
@@ -34,11 +35,13 @@ using namespace std;
 
 SonarManager sonarManager;
 MotorManager motorManager;
+LEDManager ledManager;
 StatusDeserializer statusDeserializer;
 StatusSerializer statusSerializer;
 SoftwareSerial BluetoothSerial(BTTx, BTRx);
 char SingleChar = '\0';
-int SonarUpdateCount = 0;
+
+bool ReadMode;
 
 void setup() 
 {
@@ -48,34 +51,44 @@ void setup()
     initSystemToggle();
     initSonars();
     initMotors();
+    initLEDs();
     initParser();
+
+    ReadMode = true;
 }
 
 void loop() 
 {
-    if(SonarUpdateCount == 1000)
+    if(ReadMode)
     {
-        sonarManager.updateSonar();
-        SendSonarInfo();
-        SonarUpdateCount = 0;
+        BluetoothIO();
     }
     else
     {
-        SonarUpdateCount++;
+        sonarManager.updateSonar();
+        BluetoothSerial.write('[');
+        SendSonarInfo();
+        SendMotorInfo();
+        SendLEDInfo();
+        BluetoothSerial.write(']');
+
+        ReadMode = true;
     }
-    BluetoothIO();
 }
 
 void BluetoothIO()
 {
-    if (Serial.available())
-    {         
-        BluetoothSerial.write(Serial.read());
-    }
+    // if (Serial.available())
+    // {
+    //     BluetoothSerial.write(Serial.read());
+    // }
 
     if (BluetoothSerial.available()) 
     {
         SingleChar = (char)BluetoothSerial.read();
+
+        if(SingleChar == ']')
+            ReadMode = false;
 
         BTPacket bTPacket = statusDeserializer.AddDeserializeQueue(SingleChar);
 
@@ -95,6 +108,30 @@ void BluetoothIO()
             case 'i':
                 motorManager.MotorDIRWrite(0, bTPacket.value);
                 break;
+            case 'j':
+                if(bTPacket.value == 1)
+                    ledManager.LED_Write(0, true);
+                else
+                    ledManager.LED_Write(0, false);
+                break;
+            case 'k':
+                if(bTPacket.value == 1)
+                    ledManager.LED_Write(1, true);
+                else
+                    ledManager.LED_Write(1, false);
+                break;
+            case 'l':
+                if(bTPacket.value == 1)
+                    ledManager.LED_Write(2, true);
+                else
+                    ledManager.LED_Write(2, false);
+                break;
+            case 'm':
+                if(bTPacket.value == 1)
+                    ledManager.LED_Write(3, true);
+                else
+                    ledManager.LED_Write(3, false);
+                break;
             default:
                 break;
             }
@@ -111,6 +148,22 @@ void SendSonarInfo()
         SendPacket(type, sonarManager.distance[i]);
         type++;
     }
+}
+
+void SendMotorInfo()
+{
+    SendPacket('f', motorManager.Motors[2].Power);
+    SendPacket('g', motorManager.Motors[1].Power);
+    SendPacket('h', motorManager.Motors[3].Power);
+    SendPacket('i', motorManager.Motors[0].Power);
+}
+
+void SendLEDInfo()
+{
+    SendPacket('j', ledManager.LEDs[0].IsRunning);
+    SendPacket('k', ledManager.LEDs[1].IsRunning);
+    SendPacket('l', ledManager.LEDs[2].IsRunning);
+    SendPacket('m', ledManager.LEDs[3].IsRunning);
 }
 
 void SendPacket(char type, int value)
@@ -198,6 +251,16 @@ void initMotors()
     };
 
     motorManager = MotorManager(motorinfo, BreakLight);
+}
+
+void initLEDs()
+{
+    ledManager = LEDManager(4);
+
+    ledManager.SetLEDInfo(A0, 0);
+    ledManager.SetLEDInfo(A1, 1);
+    ledManager.SetLEDInfo(A2, 2);
+    ledManager.SetLEDInfo(A3, 3);
 }
 
 void initParser()

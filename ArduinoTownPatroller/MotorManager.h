@@ -9,7 +9,7 @@ struct MotorInfo
 {
     String MotorName;
     int PinNumber;
-    bool IsRunning;
+    int Power;
 };
 
 class MotorManager
@@ -22,12 +22,12 @@ private:
         if(status == HIGH)
         {
             digitalWrite(Motors[pinindex].PinNumber, HIGH);
-            Motors[pinindex].IsRunning = true;
+            Motors[pinindex].Power = 1;
         }
         else
         {
             digitalWrite(Motors[pinindex].PinNumber, LOW);
-            Motors[pinindex].IsRunning = false;
+            Motors[pinindex].Power = 0;
         }
     }
 
@@ -36,26 +36,13 @@ private:
         if(power != 0)
         {
             analogWrite(Motors[pinindex].PinNumber, power);
-            Motors[pinindex].IsRunning = true;
+            Motors[pinindex].Power = power;
         }
         else
         {
             analogWrite(Motors[pinindex].PinNumber, power);
-            Motors[pinindex].IsRunning = false;
+            Motors[pinindex].Power = power;
         }
-    }
-
-    void UpdateBreakLight()
-    {
-        if(Motors[IDIRA].IsRunning == false && Motors[IDIRB].IsRunning == false)
-        {
-            digitalWrite(BreakLight, HIGH);
-        }
-        else
-        {
-            digitalWrite(BreakLight, LOW);
-        }
-        
     }
 
 public : 
@@ -112,8 +99,6 @@ public :
         MotorAnalogWrite(IPWMA, Rpower);
         MotorWrite(IDIRB, HIGH);  
         MotorAnalogWrite(IPWMB, Lpower);
-
-        UpdateBreakLight();
     }
 
     void Forward(int Power)
@@ -122,8 +107,6 @@ public :
         MotorAnalogWrite(IPWMA, Power);
         MotorWrite(IDIRB, HIGH);  
         MotorAnalogWrite(IPWMB, Power);
-
-        UpdateBreakLight();
     }
 
     void Backward(int Power)
@@ -132,8 +115,6 @@ public :
         MotorAnalogWrite(IPWMA, Power);
         MotorWrite(IDIRB, LOW);  
         MotorAnalogWrite(IPWMB, Power);
-
-        UpdateBreakLight();
     }
 
     void Stop()
@@ -142,8 +123,6 @@ public :
         MotorAnalogWrite(IPWMA, 0);
         MotorWrite(IDIRB, LOW);  
         MotorAnalogWrite(IPWMB, 0);
-
-        UpdateBreakLight();
     }
 
     void RRotation(int Power)
@@ -152,8 +131,6 @@ public :
         MotorAnalogWrite(IPWMA, Power);
         MotorWrite(IDIRB, LOW);  
         MotorAnalogWrite(IPWMB, Power);
-
-        UpdateBreakLight();
     }
 
     void LRotation(int Power)
@@ -162,7 +139,5 @@ public :
         MotorAnalogWrite(IPWMA, Power);
         MotorWrite(IDIRB, HIGH);  
         MotorAnalogWrite(IPWMB, Power);
-
-        UpdateBreakLight();
     }
 };
