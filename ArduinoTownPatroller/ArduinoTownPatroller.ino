@@ -3,7 +3,6 @@
 #include "Sonarmanager.h"
 #include "MotorManager.h"
 #include "StatusDeserializer.h"
-#include "StatusSerializer.h"
 #include "LEDManager.h"
 
 #define SystemToggle 9
@@ -37,7 +36,6 @@ SonarManager sonarManager;
 MotorManager motorManager;
 LEDManager ledManager;
 StatusDeserializer statusDeserializer;
-StatusSerializer statusSerializer;
 SoftwareSerial BluetoothSerial(BTTx, BTRx);
 char SingleChar = '\0';
 
@@ -78,11 +76,6 @@ void loop()
 
 void BluetoothIO()
 {
-    // if (Serial.available())
-    // {
-    //     BluetoothSerial.write(Serial.read());
-    // }
-
     if (BluetoothSerial.available()) 
     {
         SingleChar = (char)BluetoothSerial.read();
@@ -170,8 +163,6 @@ void SendPacket(char type, int value)
 {
     char cstr[16];
     itoa(value, cstr, 10);
-    //char chmsg[50] = "sdasdasdsadsa";
-    //statusSerializer.SerializeSinglePacket(type, value, chmsg);
 
     BluetoothSerial.write('{');
     BluetoothSerial.write(type);
@@ -266,5 +257,4 @@ void initLEDs()
 void initParser()
 {
     statusDeserializer = StatusDeserializer();
-    statusSerializer = StatusSerializer();
 }
